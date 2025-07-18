@@ -106,17 +106,22 @@ dataColumnSelector.addEventListener('change', (event) => {
 	    colorscale: [ [[0, 'darkseagreen'],
 			   [inverseLerp(0, Math.min(...offsets), Math.max(...offsets)), 'gray'],
 			   [1, 'crimson']] ],
-	    reversescale: false,
 	});
 	break;
 
     case 'R':
+	const responsibilities = getColumn(dataRows, 'R_Index');
+	
 	Plotly.restyle(plotlyDivId, {
 	    'colorbar.title.text': "Responsibility<br>Index",
-	    z: [ getColumn(dataRows, 'R_Index') ],
+	    z: [ responsibilities ],
 	    
-	    colorscale: [ [[0, 'darkseagreen'], [0.1, 'gray'], [1, 'crimson']] ],
-	    reversescale: true,
+	    colorscale: [ [[0, 'crimson'],
+			   [inverseLerp(0,
+					Math.min(...responsibilities),
+					Math.max(...responsibilities)),
+			    'gray'],
+			   [1, 'darkseagreen']] ],
 	});
 	break;
 
@@ -126,7 +131,6 @@ dataColumnSelector.addEventListener('change', (event) => {
 	    z: [ getColumn(dataRows, 'V_Index') ],
 	    
 	    colorscale: [ [[0, 'darkseagreen'], [0.7, 'gray'], [1, 'crimson']] ],
-	    reversescale: false,
 	});
 	break;
 	
@@ -136,7 +140,6 @@ dataColumnSelector.addEventListener('change', (event) => {
 	    z: [ getColumn(dataRows, 'CO2_Actual') ],
 	    
 	    colorscale: [ [[0, 'darkseagreen'], [0.1, 'gray'], [1, 'crimson']] ],
-	    reversescale: false,
 	});
 	break;
 	
@@ -146,7 +149,6 @@ dataColumnSelector.addEventListener('change', (event) => {
 	    z: [ getColumn(dataRows, 'CO2_Modeled') ],
 	    
 	    colorscale: [ [[0, 'darkseagreen'], [0.1, 'gray'], [1, 'crimson']] ],
-	    reversescale: false,
 	});
 	break;
 
@@ -155,14 +157,13 @@ dataColumnSelector.addEventListener('change', (event) => {
 	const changes_nmid = inverseLerp(0, Math.min(...changes), Math.max(...changes));
 
 	Plotly.restyle(plotlyDivId, {
-	    'colorbar.title.text': "CO2:<br>modeled vs actual",
+	    'colorbar.title.text': "modeled vs<br>actual, times",
 	    z: [ changes ],
 
 	    colorscale: [ [[0, 'skyblue'],
 			   [changes_nmid, 'gray'],
-			   [(changes_nmid * 9 + 1) / 10, 'crimson'],
+			   [(changes_nmid * 4 + 1) / 5, 'crimson'],
 			   [1, 'violet']] ],
-	    reversescale: false,
 	});
 	break;
 
@@ -172,7 +173,6 @@ dataColumnSelector.addEventListener('change', (event) => {
 	    z: [ getColumn(dataRows, 'GDP_Factor') ],
 
 	    colorscale: [ [[0, 'darkseagreen'], [0.1, 'gray'], [1, 'crimson']] ],
-	    reversescale: false,
 	});
 	break;
 
@@ -183,7 +183,6 @@ dataColumnSelector.addEventListener('change', (event) => {
 	    z: [ getColumn(dataRows, 'Pop_Factor') ],
 	    
 	    colorscale: [ [[0, 'darkseagreen'], [0.1, 'gray'], [1, 'crimson']] ],
-	    reversescale: false,
 	});
 	break;
 	
@@ -193,7 +192,6 @@ dataColumnSelector.addEventListener('change', (event) => {
 	    z: [ getColumn(dataRows, 'Energy_Factor') ],
 	    
 	    colorscale: [ [[0, 'darkseagreen'], [0.1, 'gray'], [1, 'crimson']] ],
-	    reversescale: false,
 	});
 	break;
 	
