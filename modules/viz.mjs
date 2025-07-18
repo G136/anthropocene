@@ -34,35 +34,6 @@ const baseData = {
     },
 }
 
-// double array shit
-// https://plotly.com/javascript/plotlyjs-function-reference/#plotlyrestyle
-const columnUpdateData = {
-    'money': {
-	z: [getColumn(dataRows, 'money')],
-	// zmid: 0,
-	// colorscale: [[[0, 'crimson'], [0.5, 'gray'], [1, 'darkseagreen']]],
-	'colorbar.title.text': "Billions<br>USD",
-    },
-    'modeled': {
-	z: [getColumn(dataRows, 'CO2_modeled')],
-	// zmid: null,
-	// colorscale: [[[0, 'darkseagreen'], [0.1, 'orange'], [1, 'crimson']]],
-	'colorbar.title.text': "modeled<br>emissions",
-    },
-    'actual': {
-	z: [getColumn(dataRows, 'CO2_actual')],
-	// zmid: null,
-	// colorscale: [[[0, 'darkseagreen'], [0.1, 'gray'], [1, 'crimson']]],
-	'colorbar.title.text': "actual<br>emissions",
-    },
-    'error': {
-	z: [getColumn(dataRows, 'error')],
-	// zmid: 0,
-	// colorscale: [[[0, 'crimson'], [0.5, 'gray'], [1, 'darkseagreen']]],
-	'colorbar.title.text': "emissions<br>error",
-    },
-}
-
 const layout = {
     paper_bgcolor: 'rgba(0, 0, 0, 0)',
     
@@ -75,7 +46,7 @@ const layout = {
 	showland: true,
 	landcolor: 'rgba(255, 255, 255, 1)',
 	// landcolor: 'magenta',
-	// showcoastlines: false,
+	showcoastlines: false,
 	projection: {
 	    type: 'cylindrical',
 	},
@@ -116,57 +87,122 @@ const config = {
 
 
 Plotly.newPlot(plotlyDivId, [baseData], layout, config)
-Plotly.restyle(plotlyDivId, columnUpdateData['money']) //TODO do the remembered <select> thingy ?
+// Plotly.restyle(plotlyDivId, columnUpdateData['Offset']) //TODO do the remembered <select> thingy ?
+
+function inverseLerp(num, min, max) {
+    return (num - min) / (max - min);
+}
 
 dataColumnSelector.addEventListener('change', (event) => {
     switch (event.target.value) {
 
-	// case 'money':
-	//     break;
+    case 'O':
+	const offsets = getColumn(dataRows, 'Offset');
 
-	// case 'modeled':
-	//     break;
-
-	// case 'actual':
-	//     break;
-
-    case 'error':
-	const z = getColumn(dataRows, 'error').filter((cell) => !isNaN(cell))
-	
-	// zmid: 0,
-	// colorscale: [[[0, 'crimson'], [0.5, 'gray'], [1, 'darkseagreen']]],
-	// 'colorbar.title.text': "emissions<br>error",
-
-	const min = Math.min(...z)
-	const max = Math.max(...z)
-	
-	const mid = 0
-	
-	const pmin = 0
-	const pmid = mid - min
-	const pmax = max - min
-
-	const nmin = pmin / pmax // 0
-	const nmid = pmid / pmax
-	const nmax = pmax / pmax // 1
-	
-	console.log(nmid)
-	debugger
-	
 	Plotly.restyle(plotlyDivId, {
-	    z: [z],
-	    colorscale: [ [[nmin, 'crimson'], [nmid * 1/2, 'orange'], [nmid * 3/4, 'yellow'], [nmid * 15/16, 'brown'],
-			   // [nmid, 'gray'],
-			   [(nmid * 3 + nmax) / 4, 'lightblue'],
-			   [nmax, 'darkseagreen']] ],
-	    'colorbar.title.text': "emissions<br>error",
-	})
+	    'colorbar.title.text': "% of<br>Resources",
+	    z: [ offsets ],
+
+	    colorscale: [ [[0, 'darkseagreen'],
+			   [inverseLerp(0, Math.min(...offsets), Math.max(...offsets)), 'gray'],
+			   [1, 'crimson']] ],
+	    reversescale: false,
+	});
+	break;
+
+    case 'R':
+	Plotly.restyle(plotlyDivId, {
+	    'colorbar.title.text': "Responsibility<br>Index",
+	    z: [ getColumn(dataRows, 'R_Index') ],
+	    
+	    colorscale: [ [[0, 'darkseagreen'], [0.1, 'gray'], [1, 'crimson']] ],
+	    reversescale: true,
+	});
+	break;
+
+    case 'I':
+	Plotly.restyle(plotlyDivId, {
+	    'colorbar.title.text': "Vulnerability<br>Index",
+	    z: [ getColumn(dataRows, 'V_Index') ],
+	    
+	    colorscale: [ [[0, 'darkseagreen'], [0.7, 'gray'], [1, 'crimson']] ],
+	    reversescale: false,
+	});
+	break;
 	
+    case 'CO2_Actual':
+	Plotly.restyle(plotlyDivId, {
+	    'colorbar.title.text': "Actual<br>Emissions",
+	    z: [ getColumn(dataRows, 'CO2_Actual') ],
+	    
+	    colorscale: [ [[0, 'darkseagreen'], [0.1, 'gray'], [1, 'crimson']] ],
+	    reversescale: false,
+	});
+	break;
+	
+    case 'CO2_Modeled':
+	Plotly.restyle(plotlyDivId, {
+	    'colorbar.title.text': "Modeled<br>Emissions",
+	    z: [ getColumn(dataRows, 'CO2_Modeled') ],
+	    
+	    colorscale: [ [[0, 'darkseagreen'], [0.1, 'gray'], [1, 'crimson']] ],
+	    reversescale: false,
+	});
+	break;
+
+    case 'Change':
+	const changes = getColumn(dataRows, 'Change');
+	const changes_nmid = inverseLerp(0, Math.min(...changes), Math.max(...changes));
+
+	Plotly.restyle(plotlyDivId, {
+	    'colorbar.title.text': "CO2:<br>modeled vs actual",
+	    z: [ changes ],
+
+	    colorscale: [ [[0, 'skyblue'],
+			   [changes_nmid, 'gray'],
+			   [(changes_nmid * 9 + 1) / 10, 'crimson'],
+			   [1, 'violet']] ],
+	    reversescale: false,
+	});
+	break;
+
+    case 'GDP_Factor':
+	Plotly.restyle(plotlyDivId, {
+	    'colorbar.title.text': "Factor:<br>GDP",
+	    z: [ getColumn(dataRows, 'GDP_Factor') ],
+
+	    colorscale: [ [[0, 'darkseagreen'], [0.1, 'gray'], [1, 'crimson']] ],
+	    reversescale: false,
+	});
+	break;
+
+	
+    case 'Pop_Factor':
+	Plotly.restyle(plotlyDivId, {
+	    'colorbar.title.text': "Factor:<br>Population",
+	    z: [ getColumn(dataRows, 'Pop_Factor') ],
+	    
+	    colorscale: [ [[0, 'darkseagreen'], [0.1, 'gray'], [1, 'crimson']] ],
+	    reversescale: false,
+	});
+	break;
+	
+    case 'Energy_Factor':
+	Plotly.restyle(plotlyDivId, {
+	    'colorbar.title.text': "Factor:<br>Energy",
+	    z: [ getColumn(dataRows, 'Energy_Factor') ],
+	    
+	    colorscale: [ [[0, 'darkseagreen'], [0.1, 'gray'], [1, 'crimson']] ],
+	    reversescale: false,
+	});
 	break;
 	
     default:
-	Plotly.restyle(plotlyDivId, columnUpdateData[event.target.value])
-	// alert("selection brokey");
+	alert("selection brokey");
 	break;
     }
 })
+
+
+dataColumnSelector.dispatchEvent(new Event('change'))
+
