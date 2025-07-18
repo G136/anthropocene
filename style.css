@@ -1,0 +1,95 @@
+html {
+    overscroll-behavior: none;
+}
+
+header, footer {
+    color: rgb(255 255 255 / 0.9);
+    
+    text-align: center;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    background-image: url('assets/fire.gif');
+    background-size: auto 100%;
+
+    text-align: center;
+}
+
+/* p { */
+/* 	  /\* text-indent: 2em; *\/ */
+/* 	  padding-left: 50px; */
+/* } */
+
+.bucks {
+    height: 2ex;
+    position: relative;
+    top: 6.5px;
+}
+
+#fire {
+    position: fixed;
+    bottom: -30px;
+
+    height: 300px;
+    width: 100%;
+    
+    background-image: url('assets/fire.gif');
+    background-size: auto 100%;
+
+    z-index: 1;
+}
+
+body {
+    background: linear-gradient(darkseagreen, crimson);
+    margin: 0;
+    min-height: 100vh;
+}
+
+main {
+    background: rgb(255 255 255 / 0.9);
+
+    border-radius: 20px;
+    
+    padding: 20px;
+    height: 100%;
+
+    transition: margin 0.1s;
+    margin: 0 5%;
+    @media (min-width: 1000px) {
+	margin: 0 10%;
+    }
+}
+
+#plotly {
+    position: relative;
+    
+    aspect-ratio: 2/1;
+}
+
+#plotly:fullscreen {
+    background-color: whitesmoke;
+}
+
+#data-column-select {
+    position: absolute;
+
+    top: 2px;
+    left: 2px;
+}
+
+footer {
+    position: relative;
+
+    margin: 0;
+}
+
+#onceler {
+    height: 100px;
+    
+    position: absolute;
+    
+    bottom: 0px;
+    right: 0;
+
+    z-index: -1;
+}
