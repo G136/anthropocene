@@ -58,54 +58,103 @@
 	  <option value="Energy_Factor">Factor: energy</option>
 	</select>
       </div>
+      
+      <h2>Overall formula</h2>
+      
+      <div class="math">
+	\[
+	\textnormal{Offset}_c
+	= \left( \frac{V_c}{\sum_{j=1}^n V_j}
+	- \frac{I_c}{\sum_{j=1}^n I_j} \right)
+	\]
+      </div>
+      
+      <ul>
+	<li>
+	  Offset\( _c \) is the % of resources a given country country \( c \)
+	  contributes (+) or reveives (-).
+	</li>
+	
+	<li>
+	  \(V_c\) is the index of vulnerability for a given country \( c \),
+	  from a 3rd party source.
+	</li>
+	
+	<li>
+	  \(I_c\) is the index of responsibility for a given country \( c \),
+	  calculated as per below.
+	</li>	
+      </ul>
 
-      <h2>In order to determine the weights, we use our model to fit the actual carbon emission data.</h2>
       
-      \[ \textnormal{CO}_2 ( \textnormal{model} ) = (\lambda_1 a_1 + \lambda_2 a_2 +\lambda_3 a_3+...+\lambda_n a_n ) \cdot \textnormal{CO}_2( \textnormal{global} ) \]
-      
-      \[ a_1 = \frac{\sum_{t= \textnormal{hist} }^{t=0} \textnormal{GDP}_c}{\sum_{t=\textnormal{hist}}^{t=0} \textnormal{GDP}_w} \]
-      
-      \[ a_2 = \frac{\sum_{t= \textnormal{hist} }^{t=0} \textnormal{Population}_c}{\sum_{t=\textnormal{hist}}^{t=0} \textnormal{Population}_w} \]
+      <h2>Index of Responsibility (modified)</h2>
 
-      <p>
-	Where \( a_i \) represents the factor by which the \( CO_2 \) emissions of the i-th influencing country compare to the world's \( CO_2 \) emissions,
-	and the corresponding weight like \( \lambda_i \)  we need is when the amount of carbon dioxide in our model approaches the actual carbon dioxide emissions.
-      </p>
+      <div class="math">
+	\[
+	I_c
+	= \frac
+	{\textnormal{CO}_2 (c)}
+	{\, R_c}
+	- 1
+	\]
+      </div>
+      
+      <ul>
+	<li>
+	  CO\( _2 \) \( (c) \) are the
+	  actual emissions of CO\( _2 \) for a given country \( c \),
+	</li>
+	
+	<li>
+	  \(R_c\) represents the modeled emissions of CO\( _2 \)
+	  for a given country \( c \).
+	</li>
+      </ul>
 
-      <p>
-	And we will use Machine Learning Linear regression to calculate \( \lambda_i \), so that we can make  the error is the smallest.
-      </p>
       
-      \[ \textnormal{Error} = \sum_t(\textnormal{CO}_2(\textnormal{model})-\textnormal{CO}_2(\textnormal{global}))^2 \]
+      <h2>Factor analysis</h2>
 
-      <img id="figure-1" src="assets/Figure_1.png" style="max-width: 100%">
-      <label for="figure-1" style="display: block; width: 100%; text-align: center">Error example</label>
+      <div class="math">
+	\[
+	R_c
+	= (\lambda_1 a_1 + \lambda_2 a_2 +\lambda_3 a_3)
+	\cdot \textnormal{CO}_2(w)
+	\]
+	
+	\[
+	a_1
+	= \frac
+	{\sum_{t= \textnormal{hist} }^{t=0} \textnormal{GDP}_c}
+	{\sum_{t=\textnormal{hist}}^{t=0} \textnormal{GDP}_w}
+	\]
+	
+	\[
+	a_2
+	= \frac
+	{\sum_{t= \textnormal{hist} }^{t=0} \textnormal{Population}_c}
+	{\sum_{t=\textnormal{hist}}^{t=0} \textnormal{Population}_w}
+	\]
 
-      <h2>1. Overall formula</h2>
-      
-      \[ \textnormal{Offset}_c = \left( \frac{V_c}{\sum_{j=1}^n V_j} - \frac{I_c}{\sum_{j=1}^n I_j} \right) \cdot \textnormal{Global Fund} \]
-      
-      \[ \textnormal{Global Fund} = \textnormal{Average CO2 price} \cdot \textnormal{CO2 over-emission} \]
-
-      <h2>2. Factor analysis</h2>
-      
-      \[ R_c = (\lambda_1 a_1 + \lambda_2 a_2 +\lambda_3 a_3+...+\lambda_n a_n) \cdot \textnormal{CO}_2(w) \]
-
-      <h2>3. Index of Responsibility (modified)</h2>
-      
-      \[ I_c = \frac{R_c \, (\textnormal{fact} \, \textnormal{CO}_2)}{\, R_c} - 1 \]
-      
-      <h2>4. Introduction to variables</h2>
+	\[
+	a_3
+	= \frac
+	{\sum_{t= \textnormal{hist} }^{t=0} \textnormal{Energy}_c}
+	{\sum_{t=\textnormal{hist}}^{t=0} \textnormal{Energy}_w}
+	\]
+      </div>
 
       <ul>
-	<li>\(V_c\) : means the vulnerability of the country.</li>
-
-	<li>\(R_c\) : means the theoretical emissions CO2.</li>
-
-	<li>\(R_c \, (\textnormal{fact} \textnormal{CO}_2) \) : means the practical emissions CO2.</li>
+	<li>\(\textnormal{CO}_2(w)\) are the world carbon emissions</li>
 	
-	<li>\(\textnormal{CO}_2(w)\) : means the global carbon budget</li>	
+	<li>
+	  We use Machine Learning Linear regression to calculate
+	  \( \lambda_i \), so that the error is the smallest.
+	</li>
       </ul>
+
+
+      
+      <div id="fireplace"></div>
       
     </main>
 
