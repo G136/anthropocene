@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Redistribution of Resources During the Anthropocene</title>
+
+    <style>
+      html {
+	  overscroll-behavior: none;
+      }
+            
+      header, footer {
+	  color: rgb(255 255 255 / 0.9);
+	  
+	  text-align: center;
+      }
+
+      h1, h2, h3, h4, h5, h6 {
+	  background-image: url('assets/fire.gif');
+	  background-size: auto 100%;
+
+	  text-align: center;
+      }
+
+      /* p { */
+      /* 	  /\* text-indent: 2em; *\/ */
+      /* 	  padding-left: 50px; */
+      /* } */
+      
+      .bucks {
+	  height: 2ex;
+	  position: relative;
+	  top: 6.5px;
+      }
+
+      #fire {
+	  position: fixed;
+	  bottom: -30px;
+
+	  height: 300px;
+	  width: 100%;
+	  
+	  background-image: url('assets/fire.gif');
+	  background-size: auto 100%;
+
+	  z-index: 1;
+      }
+
+      body {
+	  background: linear-gradient(darkseagreen, crimson);
+	  margin: 0;
+	  min-height: 100vh;
+      }
+      
+      main {
+	  background: rgb(255 255 255 / 0.9);
+
+	  border-radius: 20px;
+	  
+	  padding: 20px;
+	  height: 100%;
+
+	  transition: margin 0.1s;
+	  margin: 0 5%;
+	  @media (min-width: 1000px) {
+	      margin: 0 10%;
+	  }
+      }
+      
+      #plotly {
+	  position: relative;
+	  
+	  aspect-ratio: 2/1;
+      }
+
+      #plotly:fullscreen {
+	  background-color: whitesmoke;
+      }
+
+      #data-column-select {
+	  position: absolute;
+
+	  top: 2px;
+	  left: 2px;
+      }
+
+      footer {
+	  position: relative;
+
+	  margin: 0;
+      }
+
+      #onceler {
+	  height: 100px;
+	  
+	  position: absolute;
+	  
+	  bottom: 0px;
+	  right: 0;
+
+	  z-index: -1;
+      }
+    </style>
+
+
+    <!-- plotly -->
+    <script type="module">
+      import "https://cdn.plot.ly/plotly-3.0.1.min.js" // plotly
+      import "https://cdn.jsdelivr.net/npm/d3@7" // d3 (for d3.dsv only😬)
+
+      
+      const dataUrl = 'assets/data.csv'
+      
+      const plotlyDivId = 'plotly'
+      
+      const plotlyDiv = document.getElementById(plotlyDivId)
+      const dataColumnSelector = document.getElementById('data-column-select')
+
+      
+      const dataRows = await d3.dsv(',', dataUrl)
+
+
+      function getColumn(rows, column) {
+	  return rows.map((row) => row[column])
+      }
+
+      const baseData = {
+	  type: 'choropleth',
+	  locations: getColumn(dataRows, 'Country'),
+	  
+	  locationmode: 'country names',
+
+	  // geojson: 'assets/world.geojson',
+	  // locationmode: 'geojson-id',
+	  // featureidkey: 'properties.NAME_LONG',
+	  
+	  colorbar: {
+	      orientation: 'h',
+	      yanchor: 'bottom',
+	      y: 0,
+	  },
+      }
+
+      // double array shit
+      // https://plotly.com/javascript/plotlyjs-function-reference/#plotlyrestyle
+      const columnUpdateData = {
+	  'money': {
+	      z: [getColumn(dataRows, 'money')],
+	      // zmid: 0,
+	      // colorscale: [[[0, 'crimson'], [0.5, 'gray'], [1, 'darkseagreen']]],
+	      'colorbar.title.text': "Billions<br>USD",
+	  },
+	  'modeled': {
+	      z: [getColumn(dataRows, 'CO2_modeled')],
+	      // zmid: null,
+	      // colorscale: [[[0, 'darkseagreen'], [0.1, 'orange'], [1, 'crimson']]],
+	      'colorbar.title.text': "modeled<br>emissions",
+	  },
+	  'actual': {
+	      z: [getColumn(dataRows, 'CO2_actual')],
+	      // zmid: null,
+	      // colorscale: [[[0, 'darkseagreen'], [0.1, 'gray'], [1, 'crimson']]],
+	      'colorbar.title.text': "actual<br>emissions",
+	  },
+	  'error': {
+	      z: [getColumn(dataRows, 'error')],
+	      // zmid: 0,
+	      // colorscale: [[[0, 'crimson'], [0.5, 'gray'], [1, 'darkseagreen']]],
+	      'colorbar.title.text': "emissions<br>error",
+	  },
+      }
+
+      const layout = {
+	  paper_bgcolor: 'rgba(0, 0, 0, 0)',
+	  
+	  geo: {
+	      bgcolor: 'rgba(0, 0, 0, 0)',
+	      
+	      showframe: false,
+	      // showocean: true,
+	      // oceancolor: 'rgba(64 128 255 0.5)',
+	      showland: true,
+	      landcolor: 'rgba(255, 255, 255, 1)',
+	      // landcolor: 'magenta',
+	      // showcoastlines: false,
+	      projection: {
+		  type: 'cylindrical',
+	      },
+	  },
+	  margin: {
+	      t: 0,
+	      b: 0,
+	      l: 0,
+	      r: 0,
+	  },
+	  // autosize: true,
+      }
+
+      const config = {
+	  responsive: true,
+	  displayModeBar: true,
+	  
+	  modeBarButtonsToAdd: [{
+	      name: 'Fullscreen',
+
+	      icon: Plotly.Icons.selectbox,
+
+	      click: function(gd) {
+		  
+		  // uhh none of this will work on safari (?)
+
+		  if (document.fullscreenElement) {
+		      document.exitFullscreen()
+		  }
+		  else {
+		      plotlyDiv.requestFullscreen()
+		  }
+	      }
+	  }],
+
+	  modeBarButtonsToRemove: ['select2d', 'lasso2d'],
+      }
+
+      
+      Plotly.newPlot(plotlyDivId, [baseData], layout, config)
+      Plotly.restyle(plotlyDivId, columnUpdateData['money']) //TODO do the remembered <select> thingy ?
+      
+      dataColumnSelector.addEventListener('change', (event) => {
+	  switch (event.target.value) {
+
+	  // case 'money':
+	  //     break;
+
+	  // case 'modeled':
+	  //     break;
+
+	  // case 'actual':
+	  //     break;
+
+	  case 'error':
+	      const z = getColumn(dataRows, 'error').filter((cell) => !isNaN(cell))
+	      
+	      // zmid: 0,
+	      // colorscale: [[[0, 'crimson'], [0.5, 'gray'], [1, 'darkseagreen']]],
+	      // 'colorbar.title.text': "emissions<br>error",
+
+	      const min = Math.min(...z)
+	      const max = Math.max(...z)
+	      
+	      const mid = 0
+	      
+	      const pmin = 0
+	      const pmid = mid - min
+	      const pmax = max - min
+
+	      const nmin = pmin / pmax // 0
+	      const nmid = pmid / pmax
+	      const nmax = pmax / pmax // 1
+	      
+	      console.log(nmid)
+	      debugger
+	      
+	      Plotly.restyle(plotlyDivId, {
+		  z: [z],
+		  colorscale: [ [[nmin, 'crimson'], [nmid * 1/2, 'orange'], [nmid * 3/4, 'yellow'], [nmid * 15/16, 'brown'],
+				 // [nmid, 'gray'],
+				 [(nmid * 3 + nmax) / 4, 'lightblue'],
+				 [nmax, 'darkseagreen']] ],
+		  'colorbar.title.text': "emissions<br>error",
+	      })
+	      
+	      break;
+	     
+	  default:
+	      Plotly.restyle(plotlyDivId, columnUpdateData[event.target.value])
+	      // alert("selection brokey");
+	      break;
+	  }
+      })
+      </script>
+    
+    <!-- KaTeX -->
+    <link rel="stylesheet"
+	  href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css"
+	  integrity="sha384-5TcZemv2l/9On385z///+d7MSYlvIEw9FuZTIdZ14vJLqWphw7e7ZPuOiCHJcFCP"
+	  crossorigin="anonymous">
+
+    <script type="module" type="text/javascript">
+      // import katex from 'https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.mjs';
+      import renderMathInElement from "https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.mjs";
+
+      renderMathInElement(document.body);
+    </script>
+  </head>
+  <body>
+    <div id="fire"></div>
+    
+    <header>
+      <h1>
+	<marquee scrollamount="10">
+	<img src="assets/$.gif" class="bucks">
+	<img src="assets/$.gif" class="bucks">
+	<img src="assets/$.gif" class="bucks">
+
+	Redistribution of Resources During the Anthropocene
+	
+	<img src="assets/$.gif" class="bucks">	
+	<img src="assets/$.gif" class="bucks">
+	<img src="assets/$.gif" class="bucks">
+	</marquee>
+      </h1>
+    </header>
+
+    <main>
+      
+      <div id="plotly">
+	<!-- plotly stuff will go here -->
+	<select id="data-column-select" autocomplete="off">
+	  <option value="money">Resources Redistribution</option>
+	  <option value="modeled">CO2 modeled</option>
+	  <option value="actual">CO2 actual</option>
+	  <option value="error">error</option>
+	</select>
+      </div>
+
+      <h2>In order to determine the weights, we use our model to fit the actual carbon emission data.</h2>
+      
+      \[ \textnormal{CO}_2 ( \textnormal{model} ) = (\lambda_1 a_1 + \lambda_2 a_2 +\lambda_3 a_3+...+\lambda_n a_n ) \cdot \textnormal{CO}_2( \textnormal{global} ) \]
+      
+      \[ a_1 = \frac{\sum_{t= \textnormal{hist} }^{t=0} \textnormal{GDP}_c}{\sum_{t=\textnormal{hist}}^{t=0} \textnormal{GDP}_w} \]
+      
+      \[ a_2 = \frac{\sum_{t= \textnormal{hist} }^{t=0} \textnormal{Population}_c}{\sum_{t=\textnormal{hist}}^{t=0} \textnormal{Population}_w} \]
+
+      <p>
+	Where \( a_i \) represents the factor by which the \( CO_2 \) emissions of the i-th influencing country compare to the world's \( CO_2 \) emissions,
+	and the corresponding weight like \( \lambda_i \)  we need is when the amount of carbon dioxide in our model approaches the actual carbon dioxide emissions.
+      </p>
+
+      <p>
+	And we will use Machine Learning Linear regression to calculate \( \lambda_i \), so that we can make  the error is the smallest.
+      </p>
+      
+      \[ \textnormal{Error} = \sum_t(\textnormal{CO}_2(\textnormal{model})-\textnormal{CO}_2(\textnormal{global}))^2 \]
+
+      <img id="figure-1" src="assets/Figure_1.png" style="max-width: 100%">
+      <label for="figure-1" style="display: block; width: 100%; text-align: center">Error example</label>
+
+      <h2>1. Overall formula</h2>
+      
+      \[ \textnormal{Offset}_c = \left( \frac{V_c}{\sum_{j=1}^n V_j} - \frac{I_c}{\sum_{j=1}^n I_j} \right) \cdot \textnormal{Global Fund} \]
+      
+      \[ \textnormal{Global Fund} = \textnormal{Average CO2 price} \cdot \textnormal{CO2 over-emission} \]
+
+      <h2>2. Factor analysis</h2>
+      
+      \[ R_c = (\lambda_1 a_1 + \lambda_2 a_2 +\lambda_3 a_3+...+\lambda_n a_n) \cdot \textnormal{CO}_2(w) \]
+
+      <h2>3. Index of Responsibility (modified)</h2>
+      
+      \[ I_c = \frac{R_c \, (\textnormal{fact} \, \textnormal{CO}_2)}{\, R_c} - 1 \]
+      
+      <h2>4. Introduction to variables</h2>
+
+      <ul>
+	<li>\(V_c\) : means the vulnerability of the country.</li>
+
+	<li>\(R_c\) : means the theoretical emissions CO2.</li>
+
+	<li>\(R_c \, (\textnormal{fact} \textnormal{CO}_2) \) : means the practical emissions CO2.</li>
+	
+	<li>\(\textnormal{CO}_2(w)\) : means the global carbon budget</li>	
+      </ul>
+      
+    </main>
+
+    <footer>
+      <h5>hello</h5>
+      <img id="onceler" src="assets/how-bad-can-i-be.gif">
+    </footer>
+  </body>
+</html>
