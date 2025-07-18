@@ -107,8 +107,8 @@
 
     <!-- plotly -->
     <script type="module">
-      import "https://cdn.plot.ly/plotly-3.0.1.min.js" // plotly
-      import "https://cdn.jsdelivr.net/npm/d3@7" // d3 (for d3.dsv only😬)
+      import "./modules/external/plotly/plotly.js";
+      import "./modules/external/d3/d3.js"; // (for d3.dsv only😬)
 
       
       const dataUrl = 'assets/data.csv'
@@ -288,8 +288,7 @@
 	  crossorigin="anonymous">
 
     <script type="module" type="text/javascript">
-      // import katex from 'https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.mjs';
-      import renderMathInElement from "https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.mjs";
+      import renderMathInElement from "./modules/external/katex/auto-render/auto-render.mjs";
 
       renderMathInElement(document.body);
     </script>
